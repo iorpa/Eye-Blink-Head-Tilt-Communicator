@@ -1,13 +1,33 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
+import os
 
 app = Flask(__name__)
 
 latest_message = "Waiting for message..."
 
+# Get the folder where server.py is located
+SERVER_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Go one level up to the project folder
+PROJECT_DIR = os.path.abspath(os.path.join(SERVER_DIR, ".."))
+
+# Dashboard folder
+DASHBOARD_DIR = os.path.join(PROJECT_DIR, "Dashboard")
+
 
 @app.route("/")
 def home():
-    return "Patient Communication Server is running."
+    return send_from_directory(DASHBOARD_DIR, "index.html")
+
+
+@app.route("/style.css")
+def style():
+    return send_from_directory(DASHBOARD_DIR, "style.css")
+
+
+@app.route("/script.js")
+def script():
+    return send_from_directory(DASHBOARD_DIR, "script.js")
 
 
 @app.route("/message", methods=["POST"])
