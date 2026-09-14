@@ -1,8 +1,5 @@
-const messageElement =
-    document.getElementById("message");
-
-const messageTime =
-    document.getElementById("messageTime");
+const messageElement = document.getElementById("message");
+const messageTime = document.getElementById("messageTime");
 
 const connectionStatus =
     document.getElementById("connectionStatus");
@@ -13,163 +10,282 @@ const deviceStatus =
 const statusDot =
     document.querySelector(".status-dot");
 
+const historyElement =
+    document.getElementById("history");
 
-const SERVER_URL =
-    window.location.origin;
+const SERVER_URL = window.location.origin;
+
+let lastMessageTime = null;
 
 
-let lastMessage = "";
+/* Show current message */
+
+function showMessage(message, time) {
+
+    messageElement.textContent = message;
+
+    if (time) {
+
+        messageTime.textContent =
+            "Received: " + formatTime(time);
+
+    } else {
+
+        messageTime.textContent = "--";
+    }
+}
 
 
-function showMessage(message) {
+/* Convert server time to readable time */
+
+function formatTime(timeString) {
+
+    const date = new Date(
+        timeString.replace(" ", "T")
+    );
+
+    return date.toLocaleTimeString(
+        "en-BD",
+        {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit"
+        }
+    );
+}
+
+
+/* Clear selected message */
+
+function clearCurrentMessage() {
 
     messageElement.textContent =
-        message;
+        "Waiting for message...";
 
+    messageTime.textContent = "--";
 }
 
 
-function showMessageTime() {
+/* Check latest message */
 
-    const now =
-        new Date();
-
-
-    const time =
-        now.toLocaleTimeString(
-            "en-BD",
-            {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit"
-            }
-        );
-
-
-    messageTime.textContent =
-        "Received: " + time;
-
-}
-
-
-function setConnected() {
-
-    connectionStatus.textContent =
-        "Connected";
-
-    deviceStatus.textContent =
-        "Connected";
-
-    statusDot.style.background =
-        "#22c55e";
-
-}
-
-
-function setDisconnected() {
-
-    connectionStatus.textContent =
-        "Disconnected";
-
-    deviceStatus.textContent =
-        "Disconnected";
-
-    statusDot.style.background =
-        "#ef4444";
-
-}
-
-
-async function checkServer() {
+async function checkLatestMessage() {
 
     try {
 
-        const response =
-            await fetch(
-                SERVER_URL + "/latest"
-            );
-
+        const response = await fetch(
+            SERVER_URL + "/latest"
+        );
 
         if (!response.ok) {
-
-            throw new Error(
-                "Server response error"
-            );
-
+            throw new Error("Server response error");
         }
 
-
-        const data =
-            await response.json();
-
-
-        setConnected();
-
+        const data = await response.json();
 
         if (
             data.message &&
-            data.message !== lastMessage
+            data.time &&
+            data.time !== lastMessageTime
         ) {
 
-            lastMessage =
-                data.message;
-
-
-            console.log(
-                "Message received:",
-                data.message
-            );
-
+            lastMessageTime = data.time;
 
             showMessage(
-                data.message
+                data.message,
+                data.time
             );
 
+            loadHistory();
 
-            showMessageTime();
+            /*
+             * Remove the selected message
+             * after 30 seconds.
+             */
 
-
-            deviceStatus.textContent =
-                "Message Received";
-
+            setTimeout(
+                clearCurrentMessage,
+                30000
+            );
         }
 
-    }
-    catch (error) {
+    } catch (error) {
 
         console.log(
-            "Server connection error:",
+            "Latest message error:",
             error
         );
-
-
-        setDisconnected();
-
-
-        deviceStatus.textContent =
-            "Server disconnected";
-
     }
-
 }
 
 
-showMessage(
-    "Waiting for message..."
-);
+/* Load last 5 messages */
 
-messageTime.textContent =
-    "--";
+async function loadHistory() {
+
+    try {
+
+        const response = await fetch(
+            SERVER_URL + "/history"
+        );
+
+        if (!response.ok) {
+            throw new Error("History error");
+        }
+
+        const data = await response.json();
+
+        historyElement.innerHTML = "";
+
+        if (
+            !data.history ||
+            data.history.length === 0
+        ) {
+
+            historyElement.innerHTML =
+                '<div class="history-empty">' +
+                'No messages yet.' +
+                '</div>';
+
+            return;
+        }
 
 
-setDisconnected();
+        data.history.forEach(
+            function(item) {
+
+                const historyItem =
+                    document.createElement("div");
+
+                historyItem.className =
+                    "history-item";
 
 
-checkServer();
+                const historyMessage =
+                    document.createElement("span");
 
+                historyMessage.className =
+                    "history-message";
+
+                historyMessage.textContent =
+                    item.message;
+
+
+                const historyTime =
+                    document.createElement("span");
+
+                historyTime.className =
+                    "history-time";
+
+                historyTime.textContent =
+                    formatTime(item.time);
+
+
+                historyItem.appendChild(
+                    historyMessage
+                );
+
+                historyItem.appendChild(
+                    historyTime
+                );
+
+                historyElement.appendChild(
+                    historyItem
+                );
+            }
+        );
+
+    } catch (error) {
+
+        console.log(
+            "History error:",
+            error
+        );
+    }
+}
+
+
+/* Check whether the device is active */
+
+async function checkDeviceStatus() {
+
+    try {
+
+        const response = await fetch(
+            SERVER_URL + "/device-status"
+        );
+
+        if (!response.ok) {
+            throw new Error("Device status error");
+        }
+
+        const data = await response.json();
+
+        if (data.active) {
+
+            connectionStatus.textContent =
+                "Device Active";
+
+            deviceStatus.textContent =
+                "Device Active";
+
+            statusDot.style.background =
+                "#22c55e";
+
+        } else {
+
+            connectionStatus.textContent =
+                "Device Inactive";
+
+            deviceStatus.textContent =
+                "Device Inactive";
+
+            statusDot.style.background =
+                "#ef4444";
+        }
+
+    } catch (error) {
+
+        console.log(
+            "Device status error:",
+            error
+        );
+
+        connectionStatus.textContent =
+            "Device Inactive";
+
+        deviceStatus.textContent =
+            "Device Inactive";
+
+        statusDot.style.background =
+            "#ef4444";
+    }
+}
+
+
+/* Initial page */
+
+clearCurrentMessage();
+
+loadHistory();
+
+checkLatestMessage();
+
+checkDeviceStatus();
+
+
+/* Keep checking */
 
 setInterval(
-    checkServer,
+    checkLatestMessage,
     3000
 );
 
+setInterval(
+    loadHistory,
+    3000
+);
+
+setInterval(
+    checkDeviceStatus,
+    5000
+);

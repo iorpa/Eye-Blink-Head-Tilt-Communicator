@@ -234,3 +234,38 @@ body {
     }
 
 }
+.history-section {
+    margin-top: 30px;
+}
+
+#history {
+    margin-top: 12px;
+}
+
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 14px 16px;
+
+    margin-bottom: 8px;
+
+    border-radius: 8px;
+
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.history-message {
+    font-size: 15px;
+}
+
+.history-time {
+    font-size: 13px;
+    opacity: 0.65;
+}
+
+.history-empty {
+    padding: 15px;
+    opacity: 0.6;
+}
