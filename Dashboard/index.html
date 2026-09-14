@@ -1,195 +1,108 @@
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Eye / Head Communicator</title>
+
+<link
+    rel="stylesheet" href="style.css"
+>
 
 
-body {
-    font-family: Arial, sans-serif;
-    background: #f4f7fb;
-    color: #1f2937;
-}
+</head>
+
+<body>
 
 
-.app {
-    min-height: 100vh;
-}
+<div class="app">
+
+    <header class="header">
+
+        <div class="header-content">
+
+            <h1>
+                Eye / Head Communicator
+            </h1>
+
+            <p>
+                Assistive Communication System
+            </p>
+
+        </div>
+
+    </header>
 
 
-/* Header */
+    <main class="main">
 
-.header {
-    background: white;
-    padding: 25px 8%;
-    border-bottom: 1px solid #e5e7eb;
-}
+        <section class="message-section">
 
-
-.header h1 {
-    font-size: 28px;
-    margin-bottom: 6px;
-}
+            <div class="label">
+                SELECTED MESSAGE
+            </div>
 
 
-.header p {
-    color: #6b7280;
-    font-size: 15px;
-}
+            <div class="message-card">
+
+                <div class="message-icon">
+                    💬
+                </div>
 
 
-/* Main */
-
-.main {
-    width: 84%;
-    max-width: 1000px;
-    margin: 40px auto;
-}
-
-
-/* Labels */
-
-.label {
-    font-size: 13px;
-    font-weight: bold;
-    letter-spacing: 1px;
-    color: #6b7280;
-    margin-bottom: 12px;
-}
+                <div
+                    id="message"
+                    class="message"
+                >
+                    Waiting for message...
+                </div>
 
 
-/* Selected message */
+                <div
+                    id="messageTime"
+                    class="message-time"
+                >
+                    --
+                </div>
 
-.message-card {
-    background: white;
-    border-radius: 14px;
-    padding: 35px;
-    min-height: 190px;
+            </div>
 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    box-shadow:
-        0 4px 15px rgba(
-            0,
-            0,
-            0,
-            0.06
-        );
-
-    margin-bottom: 40px;
-}
+        </section>
 
 
-.message-icon {
-    font-size: 32px;
-    margin-bottom: 15px;
-}
+        <section class="history-section">
+
+            <div class="label">
+                MESSAGE HISTORY
+            </div>
 
 
-.message {
-    font-size: 30px;
-    font-weight: bold;
-    text-align: center;
-}
+            <div id="history">
+
+                <div class="history-empty">
+                    No messages yet.
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
 
 
-.message-time {
-    margin-top: 12px;
-    color: #6b7280;
-    font-size: 14px;
-}
+<script src="script.js"></script>
 
 
-/* History */
+</body>
 
-.history-section {
-    margin-top: 10px;
-}
-
-
-#history {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-
-.history-item {
-    background: white;
-    border-radius: 10px;
-    padding: 17px 20px;
-
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    box-shadow:
-        0 2px 8px rgba(
-            0,
-            0,
-            0,
-            0.05
-        );
-}
-
-
-.history-message {
-    font-weight: 600;
-}
-
-
-.history-time {
-    color: #6b7280;
-    font-size: 13px;
-}
-
-
-.history-empty {
-    background: white;
-    padding: 25px;
-    text-align: center;
-    border-radius: 10px;
-    color: #6b7280;
-}
-
-
-/* Mobile */
-
-@media (max-width: 600px) {
-
-    .header {
-        padding: 20px;
-    }
-
-
-    .header h1 {
-        font-size: 22px;
-    }
-
-
-    .main {
-        width: 90%;
-        margin: 25px auto;
-    }
-
-
-    .message-card {
-        padding: 25px 15px;
-    }
-
-
-    .message {
-        font-size: 23px;
-    }
-
-
-    .history-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 7px;
-    }
-
-}
+</html>
