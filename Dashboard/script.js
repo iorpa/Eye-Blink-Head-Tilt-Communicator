@@ -3,38 +3,25 @@ const connectionStatus = document.getElementById("connectionStatus");
 const deviceStatus = document.getElementById("deviceStatus");
 const statusDot = document.querySelector(".status-dot");
 
-// Replace this with your Render server URL
-const SERVER_URL = "https://YOUR-RENDER-SERVICE.onrender.com";
+const SERVER_URL = window.location.origin;
 
 let lastMessage = "";
 
-
 function showMessage(message) {
-
     messageElement.textContent = message;
-
 }
-
 
 function setConnected() {
-
     connectionStatus.textContent = "Connected";
     deviceStatus.textContent = "Connected";
-
     statusDot.style.background = "#22c55e";
-
 }
-
 
 function setDisconnected() {
-
     connectionStatus.textContent = "Disconnected";
     deviceStatus.textContent = "Disconnected";
-
     statusDot.style.background = "#ef4444";
-
 }
-
 
 async function checkServer() {
 
@@ -52,7 +39,10 @@ async function checkServer() {
 
         setConnected();
 
-        if (data.message && data.message !== lastMessage) {
+        if (
+            data.message &&
+            data.message !== lastMessage
+        ) {
 
             lastMessage = data.message;
 
@@ -65,12 +55,9 @@ async function checkServer() {
 
             deviceStatus.textContent =
                 "Message Received";
-
         }
 
-    }
-
-    catch (error) {
+    } catch (error) {
 
         console.log(
             "Server connection error:",
@@ -81,21 +68,15 @@ async function checkServer() {
 
         deviceStatus.textContent =
             "Server disconnected";
-
     }
-
 }
 
-
-// Initial dashboard state
-
 showMessage("Waiting for message...");
-
 setDisconnected();
-
-
-// Check the cloud server every 3 seconds
 
 checkServer();
 
-setInterval(checkServer, 3000);
+setInterval(
+    checkServer,
+    3000
+);
