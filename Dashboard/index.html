@@ -1,108 +1,57 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
-
 <meta charset="UTF-8">
-
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Eye / Head Communicator</title>
-
-<link
-    rel="stylesheet" href="style.css"
->
-
-
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-
 <div class="app">
 
     <header class="header">
-
         <div class="header-content">
-
-            <h1>
-                Eye / Head Communicator
-            </h1>
-
-            <p>
-                Assistive Communication System
-            </p>
-
+            <h1>Eye / Head Communicator</h1>
+            <p>Assistive Communication System</p>
         </div>
-
     </header>
-
 
     <main class="main">
 
         <section class="message-section">
-
-            <div class="label">
-                SELECTED MESSAGE
-            </div>
-
+            <div class="label">SELECTED MESSAGE</div>
 
             <div class="message-card">
+                <div class="message-icon">💬</div>
 
-                <div class="message-icon">
-                    💬
-                </div>
-
-
-                <div
-                    id="message"
-                    class="message"
-                >
+                <div id="message" class="message">
                     Waiting for message...
                 </div>
 
-
-                <div
-                    id="messageTime"
-                    class="message-time"
-                >
+                <div id="messageTime" class="message-time">
                     --
                 </div>
-
             </div>
-
         </section>
 
-
         <section class="history-section">
-
-            <div class="label">
-                MESSAGE HISTORY
-            </div>
-
+            <div class="label">MESSAGE HISTORY</div>
 
             <div id="history">
-
                 <div class="history-empty">
                     No messages yet.
                 </div>
-
             </div>
-
         </section>
 
     </main>
 
 </div>
 
-
 <script src="script.js"></script>
 
-
 </body>
-
 </html>
