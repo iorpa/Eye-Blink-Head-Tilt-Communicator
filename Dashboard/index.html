@@ -23,9 +23,7 @@
 
             <div class="status">
                 <span class="status-dot"></span>
-                <span id="connectionStatus">
-                    Disconnected
-                </span>
+                <span id="connectionStatus">Disconnected</span>
             </div>
 
         </header>
@@ -48,6 +46,10 @@
                     Waiting for message...
                 </div>
 
+                <div id="messageTime">
+                    --
+                </div>
+
             </div>
 
 
@@ -67,47 +69,6 @@
 
             </div>
 
-
-            <div class="test-section">
-
-                <h2>Test Message</h2>
-
-                <button onclick="sendTestMessage('Need Water')">
-                    Need Water
-                </button>
-
-                <button onclick="sendTestMessage('Call Nurse')">
-                    Call Nurse
-                </button>
-
-                <button onclick="sendTestMessage('In Pain')">
-                    In Pain
-                </button>
-
-                <button onclick="sendTestMessage('Reposition')">
-                    Reposition
-                </button>
-
-                <button onclick="sendTestMessage('Hot / Cold')">
-                    Hot / Cold
-                </button>
-
-                <button onclick="sendTestMessage('Yes')">
-                    Yes
-                </button>
-
-                <button onclick="sendTestMessage('No')">
-                    No
-                </button>
-
-                <button onclick="sendTestMessage('Emergency')">
-                    Emergency
-                </button>
-
-                <p id="testStatus"></p>
-
-            </div>
-
         </main>
 
     </div>
@@ -118,4 +79,3 @@
 </body>
 
 </html>
-

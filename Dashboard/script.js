@@ -1,6 +1,9 @@
 const messageElement =
     document.getElementById("message");
 
+const messageTime =
+    document.getElementById("messageTime");
+
 const connectionStatus =
     document.getElementById("connectionStatus");
 
@@ -9,9 +12,6 @@ const deviceStatus =
 
 const statusDot =
     document.querySelector(".status-dot");
-
-const testStatus =
-    document.getElementById("testStatus");
 
 
 const SERVER_URL =
@@ -23,7 +23,31 @@ let lastMessage = "";
 
 function showMessage(message) {
 
-    messageElement.textContent = message;
+    messageElement.textContent =
+        message;
+
+}
+
+
+function showMessageTime() {
+
+    const now =
+        new Date();
+
+
+    const time =
+        now.toLocaleTimeString(
+            "en-BD",
+            {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit"
+            }
+        );
+
+
+    messageTime.textContent =
+        "Received: " + time;
 
 }
 
@@ -102,6 +126,9 @@ async function checkServer() {
             );
 
 
+            showMessageTime();
+
+
             deviceStatus.textContent =
                 "Message Received";
 
@@ -127,87 +154,12 @@ async function checkServer() {
 }
 
 
-async function sendTestMessage(message) {
-
-    try {
-
-        testStatus.textContent =
-            "Sending " + message + "...";
-
-
-        const response =
-            await fetch(
-                SERVER_URL + "/message",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        message: message
-                    })
-                }
-            );
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                "Server error"
-            );
-
-        }
-
-
-        const data =
-            await response.json();
-
-
-        console.log(
-            "Test message sent:",
-            data
-        );
-
-
-        testStatus.textContent =
-            "Sent: " + message;
-
-
-        showMessage(
-            message
-        );
-
-
-        deviceStatus.textContent =
-            "Message Received";
-
-
-        lastMessage =
-            message;
-
-    }
-    catch (error) {
-
-        console.error(
-            "Test message error:",
-            error
-        );
-
-
-        testStatus.textContent =
-            "Failed to send message.";
-
-    }
-
-}
-
-
 showMessage(
     "Waiting for message..."
 );
+
+messageTime.textContent =
+    "--";
 
 
 setDisconnected();
