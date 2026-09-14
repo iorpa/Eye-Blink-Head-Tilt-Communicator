@@ -1,0 +1,236 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+body {
+    min-height: 100vh;
+
+    font-family: Arial, sans-serif;
+
+    background: #f4f6f8;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 20px;
+}
+
+
+.app {
+    width: 100%;
+    max-width: 700px;
+
+    background: white;
+
+    border-radius: 20px;
+
+    overflow: hidden;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
+}
+
+
+.header {
+    padding: 22px 25px;
+
+    background: #1f2937;
+
+    color: white;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 20px;
+}
+
+
+.header h1 {
+    font-size: 22px;
+
+    margin-bottom: 5px;
+}
+
+
+.header p {
+    font-size: 13px;
+
+    opacity: 0.7;
+}
+
+
+.status {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    font-size: 13px;
+
+    white-space: nowrap;
+}
+
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+
+    border-radius: 50%;
+
+    background: #ef4444;
+}
+
+
+.main {
+    padding: 35px 25px;
+}
+
+
+.label {
+    text-align: center;
+
+    font-size: 13px;
+
+    font-weight: bold;
+
+    letter-spacing: 2px;
+
+    color: #6b7280;
+
+    margin-bottom: 15px;
+}
+
+
+.message-card {
+    min-height: 260px;
+
+    border: 2px solid #e5e7eb;
+
+    border-radius: 18px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+
+    text-align: center;
+
+    padding: 30px;
+}
+
+
+.message-icon {
+    font-size: 40px;
+
+    margin-bottom: 20px;
+}
+
+
+#message {
+    font-size: 38px;
+
+    font-weight: bold;
+
+    color: #111827;
+
+    line-height: 1.2;
+}
+
+
+.info {
+    display: grid;
+
+    grid-template-columns: 1fr;
+
+    gap: 15px;
+
+    margin-top: 20px;
+}
+
+
+.info-box {
+    padding: 18px;
+
+    border-radius: 12px;
+
+    background: #f9fafb;
+
+    border: 1px solid #e5e7eb;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+}
+
+
+.info-title {
+    font-size: 11px;
+
+    font-weight: bold;
+
+    letter-spacing: 1px;
+
+    color: #9ca3af;
+}
+
+
+.info-value {
+    font-size: 15px;
+
+    font-weight: bold;
+
+    color: #374151;
+}
+
+
+@media (max-width: 500px) {
+
+    body {
+        padding: 10px;
+    }
+
+
+    .app {
+        border-radius: 15px;
+    }
+
+
+    .header {
+        padding: 18px;
+
+        flex-direction: column;
+
+        align-items: flex-start;
+    }
+
+
+    .header h1 {
+        font-size: 19px;
+    }
+
+
+    .main {
+        padding: 25px 15px;
+    }
+
+
+    .message-card {
+        min-height: 230px;
+    }
+
+
+    #message {
+        font-size: 32px;
+    }
+
+}

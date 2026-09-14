@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Eye / Head Communicator</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="app">
+
+        <header class="header">
+
+            <div>
+                <h1>Eye / Head Communicator</h1>
+                <p>Assistive Communication System</p>
+            </div>
+
+            <div class="status">
+                <span class="status-dot"></span>
+                <span id="connectionStatus">Disconnected</span>
+            </div>
+
+        </header>
+
+
+        <main class="main">
+
+            <div class="label">
+                SELECTED MESSAGE
+            </div>
+
+
+            <div class="message-card">
+
+                <div class="message-icon">
+                    💬
+                </div>
+
+                <div id="message">
+                    Waiting for message...
+                </div>
+
+            </div>
+
+
+            <div class="info">
+
+                <div class="info-box">
+
+                    <span class="info-title">
+                        STATUS
+                    </span>
+
+                    <span class="info-value" id="deviceStatus">
+                        Waiting
+                    </span>
+
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
