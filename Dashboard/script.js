@@ -1,4 +1,3 @@
-```javascript
 const messageElement =
     document.getElementById("message");
 
@@ -221,4 +220,4 @@ setInterval(
     checkServer,
     3000
 );
-```
+
