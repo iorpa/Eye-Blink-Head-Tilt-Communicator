@@ -4,9 +4,6 @@ const messageElement =
 const messageTimeElement =
     document.getElementById("messageTime");
 
-const historyElement =
-    document.getElementById("history");
-
 
 const SERVER_URL =
     window.location.origin;
@@ -17,9 +14,7 @@ let lastMessageTime = null;
 let clearMessageTimer = null;
 
 
-// ==================================================
-// FORMAT TIME
-// ==================================================
+/* FORMAT TIME */
 
 function formatTime(timeString) {
 
@@ -30,12 +25,7 @@ function formatTime(timeString) {
 
 
     const date =
-        new Date(
-            timeString.replace(
-                " ",
-                "T"
-            )
-        );
+        new Date(timeString);
 
 
     if (
@@ -59,9 +49,7 @@ function formatTime(timeString) {
 }
 
 
-// ==================================================
-// SHOW CURRENT MESSAGE
-// ==================================================
+/* SHOW CURRENT MESSAGE */
 
 function showMessage(
     message,
@@ -78,9 +66,7 @@ function showMessage(
             "Received: " +
             formatTime(time);
 
-    }
-
-    else {
+    } else {
 
         messageTimeElement.textContent =
             "--";
@@ -103,9 +89,7 @@ function showMessage(
 }
 
 
-// ==================================================
-// CLEAR CURRENT MESSAGE
-// ==================================================
+/* CLEAR CURRENT MESSAGE */
 
 function clearCurrentMessage() {
 
@@ -118,9 +102,7 @@ function clearCurrentMessage() {
 }
 
 
-// ==================================================
-// CHECK LATEST MESSAGE
-// ==================================================
+/* CHECK LATEST MESSAGE */
 
 async function checkLatestMessage() {
 
@@ -164,9 +146,6 @@ async function checkLatestMessage() {
                 data.message,
                 data.time
             );
-
-
-            loadHistory();
         }
 
     }
@@ -181,152 +160,16 @@ async function checkLatestMessage() {
 }
 
 
-// ==================================================
-// LOAD HISTORY
-// ==================================================
-
-async function loadHistory() {
-
-    try {
-
-        const response =
-            await fetch(
-                SERVER_URL +
-                "/history",
-                {
-                    cache:
-                        "no-store"
-                }
-            );
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                "History response error"
-            );
-        }
-
-
-        const data =
-            await response.json();
-
-
-        historyElement.innerHTML =
-            "";
-
-
-        if (
-            !data.history ||
-            data.history.length === 0
-        ) {
-
-            historyElement.innerHTML =
-                `
-                <div class="history-empty">
-                    No messages yet.
-                </div>
-                `;
-
-
-            return;
-        }
-
-
-        data.history.forEach(
-            function(item) {
-
-                const historyItem =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                historyItem.className =
-                    "history-item";
-
-
-                const historyMessage =
-                    document.createElement(
-                        "span"
-                    );
-
-
-                historyMessage.className =
-                    "history-message";
-
-
-                historyMessage.textContent =
-                    item.message;
-
-
-                const historyTime =
-                    document.createElement(
-                        "span"
-                    );
-
-
-                historyTime.className =
-                    "history-time";
-
-
-                historyTime.textContent =
-                    formatTime(
-                        item.time
-                    );
-
-
-                historyItem.appendChild(
-                    historyMessage
-                );
-
-
-                historyItem.appendChild(
-                    historyTime
-                );
-
-
-                historyElement.appendChild(
-                    historyItem
-                );
-
-            }
-        );
-
-    }
-
-    catch (error) {
-
-        console.log(
-            "History error:",
-            error
-        );
-    }
-}
-
-
-// ==================================================
-// START DASHBOARD
-// ==================================================
+/* START DASHBOARD */
 
 clearCurrentMessage();
-
-loadHistory();
 
 checkLatestMessage();
 
 
-// ==================================================
-// AUTO UPDATE
-// ==================================================
+/* AUTO UPDATE */
 
 setInterval(
     checkLatestMessage,
     3000
-);
-
-
-setInterval(
-    loadHistory,
-    5000
 );
