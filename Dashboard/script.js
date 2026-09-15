@@ -5,6 +5,13 @@ const messageTimeElement =
     document.getElementById("messageTime");
 
 
+const lastMessageElement =
+    document.getElementById("lastMessage");
+
+const lastMessageTimeElement =
+    document.getElementById("lastMessageTime");
+
+
 const SERVER_URL =
     window.location.origin;
 
@@ -102,6 +109,41 @@ function clearCurrentMessage() {
 }
 
 
+/* SHOW LAST MESSAGE */
+
+function showLastMessage(
+    message,
+    time
+) {
+
+    if (message) {
+
+        lastMessageElement.textContent =
+            message;
+
+        if (time) {
+
+            lastMessageTimeElement.textContent =
+                "Received: " +
+                formatTime(time);
+
+        } else {
+
+            lastMessageTimeElement.textContent =
+                "--";
+        }
+
+    } else {
+
+        lastMessageElement.textContent =
+            "No previous message";
+
+        lastMessageTimeElement.textContent =
+            "--";
+    }
+}
+
+
 /* CHECK LATEST MESSAGE */
 
 async function checkLatestMessage() {
@@ -113,8 +155,7 @@ async function checkLatestMessage() {
                 SERVER_URL +
                 "/latest",
                 {
-                    cache:
-                        "no-store"
+                    cache: "no-store"
                 }
             );
 
@@ -133,24 +174,39 @@ async function checkLatestMessage() {
 
         if (
             data.message &&
-            data.time &&
-            data.time !==
-                lastMessageTime
+            data.time
         ) {
 
-            lastMessageTime =
-                data.time;
+            if (
+                data.time !==
+                lastMessageTime
+            ) {
+
+                lastMessageTime =
+                    data.time;
 
 
-            showMessage(
-                data.message,
-                data.time
-            );
+                showMessage(
+                    data.message,
+                    data.time
+                );
+            }
+
+        } else {
+
+            lastMessageTime = null;
+
+            clearCurrentMessage();
         }
 
-    }
 
-    catch (error) {
+        showLastMessage(
+            data.last_message,
+            data.last_time
+        );
+
+
+    } catch (error) {
 
         console.log(
             "Latest message error:",
@@ -164,6 +220,11 @@ async function checkLatestMessage() {
 
 clearCurrentMessage();
 
+showLastMessage(
+    null,
+    null
+);
+
 checkLatestMessage();
 
 
@@ -173,3 +234,4 @@ setInterval(
     checkLatestMessage,
     3000
 );
+

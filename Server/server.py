@@ -9,10 +9,17 @@ app = Flask(__name__)
 latest_message = None
 latest_message_time = None
 
+last_message = None
+last_message_time = None
+
+
+MESSAGE_DISPLAY_TIME = 30
+
 
 SERVER_DIR = os.path.dirname(
     os.path.abspath(__file__)
 )
+
 
 PROJECT_DIR = os.path.abspath(
     os.path.join(
@@ -21,19 +28,73 @@ PROJECT_DIR = os.path.abspath(
     )
 )
 
+
 DASHBOARD_DIR = os.path.join(
     PROJECT_DIR,
     "Dashboard"
 )
 
 
-def now_iso_utc():
+def now_utc():
 
     return datetime.now(
         timezone.utc
-    ).strftime(
+    )
+
+
+def now_iso_utc():
+
+    return now_utc().strftime(
         "%Y-%m-%dT%H:%M:%SZ"
     )
+
+
+def message_is_active():
+
+    global latest_message
+    global latest_message_time
+
+
+    if (
+        latest_message is None
+        or latest_message_time is None
+    ):
+
+        return False
+
+
+    try:
+
+        message_time = datetime.strptime(
+            latest_message_time,
+            "%Y-%m-%dT%H:%M:%SZ"
+        ).replace(
+            tzinfo=timezone.utc
+        )
+
+
+        elapsed_time = (
+            now_utc() - message_time
+        ).total_seconds()
+
+
+        if elapsed_time >= MESSAGE_DISPLAY_TIME:
+
+            latest_message = None
+            latest_message_time = None
+
+            return False
+
+
+        return True
+
+
+    except Exception:
+
+        latest_message = None
+        latest_message_time = None
+
+        return False
 
 
 @app.route("/")
@@ -71,6 +132,8 @@ def receive_message():
 
     global latest_message
     global latest_message_time
+    global last_message
+    global last_message_time
 
 
     data = request.get_json(
@@ -102,8 +165,13 @@ def receive_message():
     now = now_iso_utc()
 
 
-    latest_message = message
+    if latest_message is not None:
 
+        last_message = latest_message
+        last_message_time = latest_message_time
+
+
+    latest_message = message
     latest_message_time = now
 
 
@@ -132,13 +200,34 @@ def receive_message():
 )
 def get_latest_message():
 
+    if message_is_active():
+
+        return jsonify({
+
+            "status": "success",
+
+            "message": latest_message,
+
+            "time": latest_message_time,
+
+            "last_message": last_message,
+
+            "last_time": last_message_time
+
+        }), 200
+
+
     return jsonify({
 
         "status": "success",
 
-        "message": latest_message,
+        "message": None,
 
-        "time": latest_message_time
+        "time": None,
+
+        "last_message": last_message,
+
+        "last_time": last_message_time
 
     }), 200
 
@@ -149,3 +238,4 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=5000
     )
+
