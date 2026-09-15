@@ -1,24 +1,13 @@
 const messageElement =
     document.getElementById("message");
 
+
 const messageTimeElement =
     document.getElementById("messageTime");
 
 
-const lastMessageElement =
-    document.getElementById("lastMessage");
-
-const lastMessageTimeElement =
-    document.getElementById("lastMessageTime");
-
-
 const SERVER_URL =
     window.location.origin;
-
-
-let lastMessageTime = null;
-
-let clearMessageTimer = null;
 
 
 /* FORMAT TIME */
@@ -35,11 +24,7 @@ function formatTime(timeString) {
         new Date(timeString);
 
 
-    if (
-        isNaN(
-            date.getTime()
-        )
-    ) {
+    if (isNaN(date.getTime())) {
 
         return timeString;
     }
@@ -56,6 +41,19 @@ function formatTime(timeString) {
 }
 
 
+/* CLEAR CURRENT MESSAGE */
+
+function clearMessage() {
+
+    messageElement.textContent =
+        "Waiting for message...";
+
+
+    messageTimeElement.textContent =
+        "--";
+}
+
+
 /* SHOW CURRENT MESSAGE */
 
 function showMessage(
@@ -67,103 +65,50 @@ function showMessage(
         message;
 
 
-    if (time) {
-
-        messageTimeElement.textContent =
-            "Received: " +
-            formatTime(time);
-
-    } else {
-
-        messageTimeElement.textContent =
-            "--";
-    }
-
-
-    if (clearMessageTimer) {
-
-        clearTimeout(
-            clearMessageTimer
-        );
-    }
-
-
-    clearMessageTimer =
-        setTimeout(
-            clearCurrentMessage,
-            30000
-        );
-}
-
-
-/* CLEAR CURRENT MESSAGE */
-
-function clearCurrentMessage() {
-
-    messageElement.textContent =
-        "Waiting for message...";
-
-
     messageTimeElement.textContent =
-        "--";
+        time
+            ? "Received: " +
+              formatTime(time)
+            : "--";
 }
 
 
-/* SHOW LAST MESSAGE */
-
-function showLastMessage(
-    message,
-    time
-) {
-
-    if (message) {
-
-        lastMessageElement.textContent =
-            message;
-
-        if (time) {
-
-            lastMessageTimeElement.textContent =
-                "Received: " +
-                formatTime(time);
-
-        } else {
-
-            lastMessageTimeElement.textContent =
-                "--";
-        }
-
-    } else {
-
-        lastMessageElement.textContent =
-            "No previous message";
-
-        lastMessageTimeElement.textContent =
-            "--";
-    }
-}
-
-
-/* CHECK LATEST MESSAGE */
+/* CHECK SERVER */
 
 async function checkLatestMessage() {
+
+    const latestURL =
+        SERVER_URL + "/latest";
+
+
+    console.log(
+        "Checking:",
+        latestURL
+    );
+
 
     try {
 
         const response =
             await fetch(
-                SERVER_URL +
-                "/latest",
+                latestURL,
                 {
                     cache: "no-store"
                 }
             );
 
 
+        console.log(
+            "HTTP STATUS:",
+            response.status
+        );
+
+
         if (!response.ok) {
 
             throw new Error(
-                "Server response error"
+                "Server response error: " +
+                response.status
             );
         }
 
@@ -172,44 +117,37 @@ async function checkLatestMessage() {
             await response.json();
 
 
+        console.log(
+            "SERVER DATA:",
+            data
+        );
+
+
+        /*
+          The server contains only
+          the latest message.
+        */
+
         if (
             data.message &&
             data.time
         ) {
 
-            if (
-                data.time !==
-                lastMessageTime
-            ) {
-
-                lastMessageTime =
-                    data.time;
-
-
-                showMessage(
-                    data.message,
-                    data.time
-                );
-            }
+            showMessage(
+                data.message,
+                data.time
+            );
 
         } else {
 
-            lastMessageTime = null;
-
-            clearCurrentMessage();
+            clearMessage();
         }
-
-
-        showLastMessage(
-            data.last_message,
-            data.last_time
-        );
 
 
     } catch (error) {
 
-        console.log(
-            "Latest message error:",
+        console.error(
+            "LATEST MESSAGE ERROR:",
             error
         );
     }
@@ -218,20 +156,32 @@ async function checkLatestMessage() {
 
 /* START DASHBOARD */
 
-clearCurrentMessage();
+clearMessage();
 
-showLastMessage(
-    null,
-    null
+
+console.log(
+    "Dashboard started."
 );
+
+
+console.log(
+    "Server URL:",
+    SERVER_URL
+);
+
 
 checkLatestMessage();
 
 
-/* AUTO UPDATE */
+/*
+  Check every 1 second.
+
+  This means when a second message
+  arrives, the dashboard will normally
+  show it within about 1 second.
+*/
 
 setInterval(
     checkLatestMessage,
-    3000
+    1000
 );
-
