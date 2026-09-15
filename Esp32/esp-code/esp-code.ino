@@ -1,4 +1,3 @@
-
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <math.h>
@@ -88,6 +87,7 @@ enum ActionMode {
 
 ActionMode actionMode = READY;
 
+
 // Display current message
 void displayMessage() {
   lcd.clear();
@@ -99,6 +99,7 @@ void displayMessage() {
   lcd.print(messages[currentMessage]);
 }
 
+
 // Display selected message
 void displaySelectedMessage() {
   lcd.clear();
@@ -109,6 +110,7 @@ void displaySelectedMessage() {
   lcd.setCursor(0, 1);
   lcd.print(messages[currentMessage]);
 }
+
 
 // Display blink count
 void displayBlinkCount() {
@@ -123,24 +125,13 @@ void displayBlinkCount() {
   lcd.print(messages[currentMessage]);
 }
 
-// Display head movement count
-void displayHeadCount() {
-  lcd.clear();
-
-  lcd.setCursor(0, 0);
-  lcd.print("Movement ");
-  lcd.print(headMoveCount);
-  lcd.print("/3");
-
-  lcd.setCursor(0, 1);
-  lcd.print(messages[currentMessage]);
-}
 
 // Reset blink sequence
 void resetBlinkCount() {
   blinkCount = 0;
   firstBlinkTime = 0;
 }
+
 
 // Reset head movement sequence
 void resetHeadMovement() {
@@ -150,14 +141,17 @@ void resetHeadMovement() {
   firstHeadMoveTime = 0;
 }
 
+
 // Connect to Wi-Fi
 void connectWiFi() {
+
   Serial.println();
   Serial.println("Connecting to Wi-Fi...");
 
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Connecting WiFi");
+
   lcd.setCursor(0, 1);
   lcd.print("Please wait...");
 
@@ -165,6 +159,7 @@ void connectWiFi() {
   WiFi.begin(WIFI_NAME, WIFI_PASSWORD);
 
   while (WiFi.status() != WL_CONNECTED) {
+
     delay(500);
 
     Serial.print(".");
@@ -192,15 +187,21 @@ void connectWiFi() {
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("WiFi Connected");
+
   lcd.setCursor(0, 1);
   lcd.print("Starting...");
+
   delay(1000);
 }
 
+
 // Maintain Wi-Fi connection
 void maintainWiFi() {
+
   if (WiFi.status() == WL_CONNECTED) {
+
     if (!wifiConnected) {
+
       Serial.println();
       Serial.println("Wi-Fi connected again.");
 
@@ -216,14 +217,19 @@ void maintainWiFi() {
     return;
   }
 
+
   if (wifiConnected) {
+
     Serial.println();
     Serial.println("Wi-Fi connection lost.");
     Serial.println("Trying to reconnect...");
+
     wifiConnected = false;
   }
 
+
   if (millis() - lastWiFiAttempt >= WIFI_RETRY_INTERVAL) {
+
     lastWiFiAttempt = millis();
 
     Serial.println();
@@ -234,18 +240,24 @@ void maintainWiFi() {
   }
 }
 
+
 // Send selected message to Render
 void sendSocketNotification(const char* message) {
+
   Serial.println();
   Serial.println("Preparing cloud notification...");
 
   if (WiFi.status() != WL_CONNECTED) {
+
     Serial.println("Wi-Fi not connected.");
     Serial.println("Cloud notification skipped.");
+
     return;
   }
 
+
   WiFiClientSecure client;
+
   client.setInsecure();
 
   HTTPClient http;
@@ -255,24 +267,36 @@ void sendSocketNotification(const char* message) {
   http.setConnectTimeout(HTTP_TIMEOUT);
   http.setTimeout(HTTP_TIMEOUT);
 
+
   if (!http.begin(client, SERVER_URL)) {
+
     Serial.println("Could not start HTTPS connection.");
     Serial.println("Local communicator continues normally.");
+
     return;
   }
 
-  http.addHeader("Content-Type", "application/json");
+
+  http.addHeader(
+    "Content-Type",
+    "application/json"
+  );
+
 
   String jsonData = "{\"message\":\"";
   jsonData += message;
   jsonData += "\"}";
 
+
   Serial.println("Sending:");
   Serial.println(jsonData);
 
+
   int httpCode = http.POST(jsonData);
 
+
   if (httpCode > 0) {
+
     Serial.print("HTTP response code: ");
     Serial.println(httpCode);
 
@@ -281,57 +305,92 @@ void sendSocketNotification(const char* message) {
     Serial.println("Server response:");
     Serial.println(response);
 
+
     if (httpCode == 200) {
+
       Serial.println();
-      Serial.println("MESSAGE SENT TO RENDER SUCCESSFULLY");
+      Serial.println(
+        "MESSAGE SENT TO RENDER SUCCESSFULLY"
+      );
+
     } else {
+
       Serial.println();
-      Serial.println("SERVER RETURNED AN ERROR");
+      Serial.println(
+        "SERVER RETURNED AN ERROR"
+      );
     }
+
   } else {
+
     Serial.print("HTTPS request failed: ");
-    Serial.println(http.errorToString(httpCode));
-    Serial.println("Local communicator continues normally.");
+    Serial.println(
+      http.errorToString(httpCode)
+    );
+
+    Serial.println(
+      "Local communicator continues normally."
+    );
   }
+
 
   http.end();
 }
 
+
 // Select current message
 void selectMessage() {
+
   if (messageSelected) {
     return;
   }
 
+
   messageSelected = true;
   selectionStartTime = millis();
+
 
   Serial.println();
   Serial.println("SELECTED MESSAGE:");
   Serial.println(messages[currentMessage]);
   Serial.println();
 
+
   displaySelectedMessage();
 
+
   eyesClosed = false;
+
   resetBlinkCount();
   resetHeadMovement();
 
   actionMode = READY;
 
-  Serial.println("Selected message will remain");
-  Serial.println("on LCD for 30 seconds.");
 
-  // Send selected message to cloud server
-  sendSocketNotification(messages[currentMessage]);
+  Serial.println(
+    "Selected message will remain"
+  );
+
+  Serial.println(
+    "on LCD for 30 seconds."
+  );
+
+
+  sendSocketNotification(
+    messages[currentMessage]
+  );
+
 
   delay(SELECTED_DISPLAY_TIME);
 
+
   currentMessage++;
+
 
   if (currentMessage >= messageCount) {
     currentMessage = 0;
   }
+
 
   messageSelected = false;
 
@@ -339,55 +398,98 @@ void selectMessage() {
   resetHeadMovement();
 
   eyesClosed = false;
+
   actionMode = READY;
 
   lastMessageChange = millis();
 
+
   Serial.print("Next message: ");
   Serial.println(messages[currentMessage]);
+
 
   displayMessage();
 }
 
+
 // Read MPU6050 acceleration
-void readMPU(int16_t &ax, int16_t &ay, int16_t &az) {
+void readMPU(
+  int16_t &ax,
+  int16_t &ay,
+  int16_t &az
+) {
+
   Wire.beginTransmission(MPU6050_ADDR);
+
   Wire.write(0x3B);
+
   Wire.endTransmission(false);
 
-  Wire.requestFrom(MPU6050_ADDR, 6);
+  Wire.requestFrom(
+    MPU6050_ADDR,
+    6
+  );
+
 
   if (Wire.available() == 6) {
+
     ax = Wire.read() << 8 | Wire.read();
+
     ay = Wire.read() << 8 | Wire.read();
+
     az = Wire.read() << 8 | Wire.read();
   }
 }
 
+
 // Calculate pitch and roll
-void getAngles(float &pitch, float &roll) {
+void getAngles(
+  float &pitch,
+  float &roll
+) {
+
   int16_t ax;
   int16_t ay;
   int16_t az;
 
-  readMPU(ax, ay, az);
+  readMPU(
+    ax,
+    ay,
+    az
+  );
+
 
   pitch = atan2(
     ax,
-    sqrt((float)ay * ay + (float)az * az)
+    sqrt(
+      (float)ay * ay +
+      (float)az * az
+    )
   ) * 180.0 / PI;
+
 
   roll = atan2(
     ay,
-    sqrt((float)ax * ax + (float)az * az)
+    sqrt(
+      (float)ax * ax +
+      (float)az * az
+    )
   ) * 180.0 / PI;
 }
 
+
 // Calibrate neutral head position
 void calibrateNeutral() {
+
   Serial.println();
-  Serial.println("Keep your head straight...");
-  Serial.println("Calibrating...");
+  Serial.println(
+    "Keep your head straight..."
+  );
+
+  Serial.println(
+    "Calibrating..."
+  );
+
 
   lcd.clear();
 
@@ -397,31 +499,48 @@ void calibrateNeutral() {
   lcd.setCursor(0, 1);
   lcd.print("straight...");
 
+
   float pitchSum = 0;
   float rollSum = 0;
 
+
   for (int i = 0; i < 100; i++) {
+
     float pitch;
     float roll;
 
-    getAngles(pitch, roll);
+    getAngles(
+      pitch,
+      roll
+    );
+
 
     pitchSum += pitch;
     rollSum += roll;
 
+
     delay(20);
   }
 
-  basePitch = pitchSum / 100.0;
-  baseRoll = rollSum / 100.0;
 
-  Serial.println("Calibration complete.");
+  basePitch =
+    pitchSum / 100.0;
+
+  baseRoll =
+    rollSum / 100.0;
+
+
+  Serial.println(
+    "Calibration complete."
+  );
+
 
   Serial.print("Base Pitch: ");
   Serial.println(basePitch);
 
   Serial.print("Base Roll: ");
   Serial.println(baseRoll);
+
 
   lcd.clear();
 
@@ -434,16 +553,28 @@ void calibrateNeutral() {
   delay(1500);
 }
 
+
 // Setup
 void setup() {
+
   Serial.begin(115200);
 
-  pinMode(IR_PIN, INPUT);
 
-  Wire.begin(SDA_PIN, SCL_PIN);
+  pinMode(
+    IR_PIN,
+    INPUT
+  );
+
+
+  Wire.begin(
+    SDA_PIN,
+    SCL_PIN
+  );
+
 
   lcd.init();
   lcd.backlight();
+
 
   lcd.clear();
 
@@ -453,224 +584,442 @@ void setup() {
   lcd.setCursor(0, 1);
   lcd.print("Communicator");
 
+
   delay(1500);
 
-  // Connect to the only configured Wi-Fi
-  // The ESP32 keeps trying until connected
+
   connectWiFi();
 
-  // Wake up MPU6050
-  Wire.beginTransmission(MPU6050_ADDR);
+
+  Wire.beginTransmission(
+    MPU6050_ADDR
+  );
+
   Wire.write(0x6B);
   Wire.write(0);
+
   Wire.endTransmission();
 
+
   Serial.println();
-  Serial.println("Eye Blink / Head Tilt");
-  Serial.println("Communicator Started");
+  Serial.println(
+    "Eye Blink / Head Tilt"
+  );
+
+  Serial.println(
+    "Communicator Started"
+  );
+
 
   delay(1000);
 
-  // Calibrate MPU6050
+
   calibrateNeutral();
 
+
   Serial.print("Current message: ");
-  Serial.println(messages[currentMessage]);
+  Serial.println(
+    messages[currentMessage]
+  );
+
 
   displayMessage();
 
-  lastMessageChange = millis();
+
+  lastMessageChange =
+    millis();
+
 
   actionMode = READY;
 }
 
+
 // Main loop
 void loop() {
+
   maintainWiFi();
+
 
   if (messageSelected) {
     return;
   }
 
-  int sensor = digitalRead(IR_PIN);
 
-  // Eye blink detection
+  int sensor =
+    digitalRead(IR_PIN);
+
+
+  /*
+    EYE BLINK DETECTION
+
+    This is kept from the working version.
+
+    HIGH  = eyes closed
+    LOW   = eyes open
+
+    < 300 ms       = normal blink, ignored
+    300 ms - <2 s  = intentional blink
+    2 - 4 sec      = long closure, select
+    > 4 sec        = ignored
+
+    3 intentional blinks = select message
+  */
+
   if (actionMode != HEAD_ACTION) {
+
     if (sensor == HIGH) {
+
       if (!eyesClosed) {
+
         eyesClosed = true;
-        eyeCloseStart = millis();
 
-        Serial.println("EYES CLOSED");
+        eyeCloseStart =
+          millis();
 
-        actionMode = EYE_ACTION;
+
+        Serial.println(
+          "EYES CLOSED"
+        );
+
+
+        actionMode =
+          EYE_ACTION;
       }
-    } else {
+    }
+
+    else {
+
       if (eyesClosed) {
+
         unsigned long closeDuration =
           millis() - eyeCloseStart;
 
-        Serial.print("CLOSED FOR: ");
-        Serial.print(closeDuration);
-        Serial.println(" ms");
+
+        Serial.print(
+          "CLOSED FOR: "
+        );
+
+        Serial.print(
+          closeDuration
+        );
+
+        Serial.println(
+          " ms"
+        );
+
 
         // Normal blink
-        if (closeDuration < NORMAL_BLINK_TIME) {
-          Serial.println("NORMAL BLINK - IGNORED");
+        if (
+          closeDuration <
+          NORMAL_BLINK_TIME
+        ) {
+
+          Serial.println(
+            "NORMAL BLINK - IGNORED"
+          );
+
 
           eyesClosed = false;
-          actionMode = READY;
+
+          actionMode =
+            READY;
         }
+
 
         // Long closure
         else if (
-          closeDuration >= MIN_SELECT_TIME &&
-          closeDuration <= MAX_SELECT_TIME
+          closeDuration >=
+          MIN_SELECT_TIME
+          &&
+          closeDuration <=
+          MAX_SELECT_TIME
         ) {
-          Serial.println("LONG CLOSURE - SELECT");
+
+          Serial.println(
+            "LONG CLOSURE - SELECT"
+          );
+
 
           eyesClosed = false;
+
           resetBlinkCount();
 
+
           selectMessage();
+
 
           return;
         }
 
+
         // Intentional short blink
-        else if (closeDuration < MIN_SELECT_TIME) {
-          unsigned long currentTime = millis();
+        else if (
+          closeDuration <
+          MIN_SELECT_TIME
+        ) {
+
+          unsigned long currentTime =
+            millis();
+
 
           // First blink
           if (blinkCount == 0) {
-            blinkCount = 1;
-            firstBlinkTime = currentTime;
-            lastMessageChange = millis();
-            actionMode = EYE_ACTION;
 
-            Serial.println("INTENTIONAL BLINK 1");
-            Serial.println("Message paused.");
-            Serial.println("Waiting 5 seconds for Blink 2...");
+            blinkCount = 1;
+
+            firstBlinkTime =
+              currentTime;
+
+            lastMessageChange =
+              millis();
+
+            actionMode =
+              EYE_ACTION;
+
+
+            Serial.println(
+              "INTENTIONAL BLINK 1"
+            );
+
+            Serial.println(
+              "Message paused."
+            );
+
+            Serial.println(
+              "Waiting 5 seconds for Blink 2..."
+            );
+
 
             displayBlinkCount();
           }
 
+
           // Second / third blink
           else {
-            blinkCount++;
-            firstBlinkTime = currentTime;
 
-            Serial.print("INTENTIONAL BLINK ");
-            Serial.println(blinkCount);
+            blinkCount++;
+
+            firstBlinkTime =
+              currentTime;
+
+
+            Serial.print(
+              "INTENTIONAL BLINK "
+            );
+
+            Serial.println(
+              blinkCount
+            );
+
 
             // Second blink
             if (blinkCount == 2) {
-              Serial.println("Blink 2 detected.");
-              Serial.println("Same message maintained.");
-              Serial.println("Timer restarted.");
-              Serial.println("Waiting 5 seconds for Blink 3...");
+
+              Serial.println(
+                "Blink 2 detected."
+              );
+
+              Serial.println(
+                "Same message maintained."
+              );
+
+              Serial.println(
+                "Timer restarted."
+              );
+
+              Serial.println(
+                "Waiting 5 seconds for Blink 3..."
+              );
+
 
               displayBlinkCount();
             }
 
+
             // Third blink
             else if (
-              blinkCount >= REQUIRED_BLINKS
+              blinkCount >=
+              REQUIRED_BLINKS
             ) {
-              Serial.println("Blink 3 detected.");
-              Serial.println("Same message maintained.");
-              Serial.println("3 INTENTIONAL BLINKS - SELECT");
+
+              Serial.println(
+                "Blink 3 detected."
+              );
+
+              Serial.println(
+                "Same message maintained."
+              );
+
+              Serial.println(
+                "3 INTENTIONAL BLINKS - SELECT"
+              );
+
 
               eyesClosed = false;
+
               resetBlinkCount();
 
+
               selectMessage();
+
 
               return;
             }
           }
 
+
           eyesClosed = false;
 
-          if (blinkCount < REQUIRED_BLINKS) {
-            actionMode = EYE_ACTION;
+
+          if (
+            blinkCount <
+            REQUIRED_BLINKS
+          ) {
+
+            actionMode =
+              EYE_ACTION;
           }
         }
 
+
         // More than 4 seconds
         else {
-          Serial.println("CLOSURE > 4 SECONDS - IGNORED");
+
+          Serial.println(
+            "CLOSURE > 4 SECONDS - IGNORED"
+          );
+
 
           eyesClosed = false;
+
           resetBlinkCount();
 
-          actionMode = READY;
+          actionMode =
+            READY;
+
 
           displayMessage();
 
-          lastMessageChange = millis();
+          lastMessageChange =
+            millis();
         }
       }
     }
 
+
     // Blink timeout
     if (
-      blinkCount > 0 &&
-      millis() - firstBlinkTime > MAX_BLINK_WINDOW
+      blinkCount > 0
+      &&
+      millis() - firstBlinkTime >
+      MAX_BLINK_WINDOW
     ) {
+
       Serial.println();
-      Serial.println("BLINK WAITING TIME EXPIRED");
-      Serial.println("Blink sequence reset.");
+
+      Serial.println(
+        "BLINK WAITING TIME EXPIRED"
+      );
+
+      Serial.println(
+        "Blink sequence reset."
+      );
+
 
       resetBlinkCount();
 
-      actionMode = READY;
+      actionMode =
+        READY;
+
 
       displayMessage();
 
-      lastMessageChange = millis();
+      lastMessageChange =
+        millis();
     }
   }
 
+
   // Head tilt detection
   if (actionMode != EYE_ACTION) {
+
     float pitch;
     float roll;
 
-    getAngles(pitch, roll);
+
+    getAngles(
+      pitch,
+      roll
+    );
+
 
     float pitchChange =
-      abs(pitch - basePitch);
+      abs(
+        pitch - basePitch
+      );
+
 
     float rollChange =
-      abs(roll - baseRoll);
+      abs(
+        roll - baseRoll
+      );
+
 
     float movementAmount =
-      max(pitchChange, rollChange);
+      max(
+        pitchChange,
+        rollChange
+      );
+
 
     // Head movement detected
-    if (movementAmount >= TILT_THRESHOLD) {
+    if (
+      movementAmount >=
+      TILT_THRESHOLD
+    ) {
+
       if (!headTilted) {
+
         headTilted = true;
 
+
         Serial.println();
-        Serial.println("HEAD MOVEMENT DETECTED");
+
+        Serial.println(
+          "HEAD MOVEMENT DETECTED"
+        );
+
 
         // First movement
         if (!headCountingActive) {
-          actionMode = HEAD_ACTION;
 
-          headCountingActive = true;
+          actionMode =
+            HEAD_ACTION;
+
+          headCountingActive =
+            true;
 
           headMoveCount = 1;
 
-          firstHeadMoveTime = millis();
+          firstHeadMoveTime =
+            millis();
 
-          lastMessageChange = millis();
+          lastMessageChange =
+            millis();
 
-          Serial.println("HEAD MOVEMENT 1");
-          Serial.println("Message paused.");
-          Serial.println("Waiting 5 seconds for Movement 2...");
+
+          Serial.println(
+            "HEAD MOVEMENT 1"
+          );
+
+          Serial.println(
+            "Message paused."
+          );
+
+          Serial.println(
+            "Waiting 5 seconds for Movement 2..."
+          );
+
 
           lcd.clear();
 
@@ -678,23 +1027,49 @@ void loop() {
           lcd.print("Movement 1/3");
 
           lcd.setCursor(0, 1);
-          lcd.print(messages[currentMessage]);
+          lcd.print(
+            messages[currentMessage]
+          );
         }
+
 
         // Second / third movement
         else {
-          headMoveCount++;
-          firstHeadMoveTime = millis();
 
-          Serial.print("HEAD MOVEMENT ");
-          Serial.println(headMoveCount);
+          headMoveCount++;
+
+          firstHeadMoveTime =
+            millis();
+
+
+          Serial.print(
+            "HEAD MOVEMENT "
+          );
+
+          Serial.println(
+            headMoveCount
+          );
+
 
           // Second movement
           if (headMoveCount == 2) {
-            Serial.println("Movement 2 detected.");
-            Serial.println("Same message maintained.");
-            Serial.println("Timer restarted.");
-            Serial.println("Waiting 5 seconds for Movement 3...");
+
+            Serial.println(
+              "Movement 2 detected."
+            );
+
+            Serial.println(
+              "Same message maintained."
+            );
+
+            Serial.println(
+              "Timer restarted."
+            );
+
+            Serial.println(
+              "Waiting 5 seconds for Movement 3..."
+            );
+
 
             lcd.clear();
 
@@ -702,18 +1077,33 @@ void loop() {
             lcd.print("Movement 2/3");
 
             lcd.setCursor(0, 1);
-            lcd.print(messages[currentMessage]);
+            lcd.print(
+              messages[currentMessage]
+            );
           }
+
 
           // Third movement
           else if (
-            headMoveCount >= REQUIRED_MOVEMENTS
+            headMoveCount >=
+            REQUIRED_MOVEMENTS
           ) {
-            Serial.println("Movement 3 detected.");
-            Serial.println("Same message maintained.");
-            Serial.println("3 HEAD MOVEMENTS - SELECT");
+
+            Serial.println(
+              "Movement 3 detected."
+            );
+
+            Serial.println(
+              "Same message maintained."
+            );
+
+            Serial.println(
+              "3 HEAD MOVEMENTS - SELECT"
+            );
+
 
             selectMessage();
+
 
             return;
           }
@@ -721,60 +1111,107 @@ void loop() {
       }
     }
 
+
     // Return to neutral
-    if (movementAmount <= NEUTRAL_THRESHOLD) {
+    if (
+      movementAmount <=
+      NEUTRAL_THRESHOLD
+    ) {
+
       if (headTilted) {
+
         headTilted = false;
 
-        Serial.println("HEAD RETURNED TO NEUTRAL");
+
+        Serial.println(
+          "HEAD RETURNED TO NEUTRAL"
+        );
       }
     }
 
+
     // Head movement waiting time
     if (headCountingActive) {
+
       if (
-        millis() - firstHeadMoveTime >
+        millis() -
+        firstHeadMoveTime >
         MAX_HEAD_WINDOW
       ) {
+
         Serial.println();
-        Serial.println("HEAD MOVEMENT WAITING TIME EXPIRED");
-        Serial.println("Movement sequence reset.");
+
+        Serial.println(
+          "HEAD MOVEMENT WAITING TIME EXPIRED"
+        );
+
+        Serial.println(
+          "Movement sequence reset."
+        );
+
 
         resetHeadMovement();
 
-        actionMode = READY;
+        actionMode =
+          READY;
+
 
         displayMessage();
 
-        lastMessageChange = millis();
+        lastMessageChange =
+          millis();
+
 
         return;
       }
     }
   }
 
+
   // Normal message cycling
   if (
-    actionMode == READY &&
-    !eyesClosed &&
-    blinkCount == 0 &&
-    !headCountingActive &&
-    !headTilted &&
-    millis() - lastMessageChange >= MESSAGE_INTERVAL
+    actionMode == READY
+    &&
+    !eyesClosed
+    &&
+    blinkCount == 0
+    &&
+    !headCountingActive
+    &&
+    !headTilted
+    &&
+    millis() - lastMessageChange >=
+      MESSAGE_INTERVAL
   ) {
+
     currentMessage++;
 
-    if (currentMessage >= messageCount) {
+
+    if (
+      currentMessage >=
+      messageCount
+    ) {
+
       currentMessage = 0;
     }
 
-    Serial.print("Current message: ");
-    Serial.println(messages[currentMessage]);
+
+    Serial.print(
+      "Current message: "
+    );
+
+    Serial.println(
+      messages[currentMessage]
+    );
+
 
     displayMessage();
 
-    lastMessageChange = millis();
+
+    lastMessageChange =
+      millis();
   }
+
 
   delay(20);
 }
