@@ -1,3 +1,4 @@
+```javascript
 const messageElement =
     document.getElementById("message");
 
@@ -123,11 +124,6 @@ async function checkLatestMessage() {
         );
 
 
-        /*
-          The server contains only
-          the latest message.
-        */
-
         if (
             data.message &&
             data.time
@@ -176,12 +172,11 @@ checkLatestMessage();
 /*
   Check every 1 second.
 
-  This means when a second message
-  arrives, the dashboard will normally
-  show it within about 1 second.
+  Only the latest message is displayed.
 */
 
 setInterval(
     checkLatestMessage,
     1000
 );
+```

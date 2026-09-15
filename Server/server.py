@@ -7,9 +7,6 @@ app = Flask(__name__)
 latest_message = None
 latest_message_time = None
 
-last_message = None
-last_message_time = None
-
 MESSAGE_DISPLAY_TIME = 30
 
 SERVER_DIR = os.path.dirname(
@@ -43,8 +40,6 @@ def message_is_active():
 
     global latest_message
     global latest_message_time
-    global last_message
-    global last_message_time
 
     if (
         latest_message is None
@@ -71,9 +66,6 @@ def message_is_active():
                 "Current message expired:",
                 latest_message
             )
-
-            last_message = latest_message
-            last_message_time = latest_message_time
 
             latest_message = None
             latest_message_time = None
@@ -130,10 +122,6 @@ def receive_message():
 
     global latest_message
     global latest_message_time
-    global last_message
-    global last_message_time
-
-    message_is_active()
 
     data = request.get_json(
         silent=True
@@ -155,27 +143,20 @@ def receive_message():
             "message": "No patient message received."
         }), 400
 
-    now = now_iso_utc()
-
-    if latest_message is not None:
-
-        last_message = latest_message
-        last_message_time = latest_message_time
-
     latest_message = message
-    latest_message_time = now
+    latest_message_time = now_iso_utc()
 
     print()
     print("NEW PATIENT MESSAGE")
     print("-------------------")
-    print("Message:", message)
-    print("Received:", now)
+    print("Message:", latest_message)
+    print("Received:", latest_message_time)
     print()
 
     return jsonify({
         "status": "success",
-        "message": message,
-        "time": now
+        "message": latest_message,
+        "time": latest_message_time
     }), 200
 
 
@@ -190,15 +171,20 @@ def get_latest_message():
     return jsonify({
         "status": "success",
         "message": latest_message,
-        "time": latest_message_time,
-        "last_message": last_message,
-        "last_time": last_message_time
+        "time": latest_message_time
     }), 200
 
 
 if __name__ == "__main__":
 
+    port = int(
+        os.environ.get(
+            "PORT",
+            5000
+        )
+    )
+
     app.run(
         host="0.0.0.0",
-        port=5000
+        port=port
     )
