@@ -1,3 +1,4 @@
+
 from flask import Flask, request, jsonify, send_from_directory
 from datetime import datetime, timezone
 import os
@@ -53,6 +54,8 @@ def message_is_active():
 
     global latest_message
     global latest_message_time
+    global last_message
+    global last_message_time
 
 
     if (
@@ -79,6 +82,12 @@ def message_is_active():
 
 
         if elapsed_time >= MESSAGE_DISPLAY_TIME:
+
+            # Move the expired current message
+            # into the last-message slot
+
+            last_message = latest_message
+            last_message_time = latest_message_time
 
             latest_message = None
             latest_message_time = None
@@ -165,11 +174,16 @@ def receive_message():
     now = now_iso_utc()
 
 
+    # If there is an active current message,
+    # move it to the last-message slot
+
     if latest_message is not None:
 
         last_message = latest_message
         last_message_time = latest_message_time
 
+
+    # Store the new message as current
 
     latest_message = message
     latest_message_time = now
@@ -200,30 +214,16 @@ def receive_message():
 )
 def get_latest_message():
 
-    if message_is_active():
-
-        return jsonify({
-
-            "status": "success",
-
-            "message": latest_message,
-
-            "time": latest_message_time,
-
-            "last_message": last_message,
-
-            "last_time": last_message_time
-
-        }), 200
+    message_is_active()
 
 
     return jsonify({
 
         "status": "success",
 
-        "message": None,
+        "message": latest_message,
 
-        "time": None,
+        "time": latest_message_time,
 
         "last_message": last_message,
 
@@ -238,4 +238,3 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=5000
     )
-
