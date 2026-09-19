@@ -1,4 +1,3 @@
-```javascript
 const messageElement =
     document.getElementById("message");
 
@@ -179,4 +178,4 @@ setInterval(
     checkLatestMessage,
     1000
 );
-```
+
